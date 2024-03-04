@@ -1,3 +1,1 @@
-# patterns_codelab
-
-A new Flutter project.
+begitulah pemula banyak errornya
