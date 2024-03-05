@@ -1,1 +1,1 @@
-begitulah pemula banyak errornya
+masih pemula
