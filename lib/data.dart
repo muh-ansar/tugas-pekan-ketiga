@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 class Document {
+  final Map<String, Object?> _json;
+  Document() : _json = jsonDecode(documentJson);
+
   (String, {DateTime modified}) getMetadata() {
     if (_json
         case {
@@ -13,6 +16,30 @@ class Document {
     } else {
       throw const FormatException('Unexpected JSON');
     }
+  }
+
+  List<Block> getBlocks() {
+    if (_json case {'blocks': List blocksJson}) {
+      return <Block>[
+        for (var blockJson in blocksJson) Block.fromJson(blockJson)
+      ];
+    } else {
+      throw const FormatException('Unexpected JSON format');
+    }
+  }
+}
+
+sealed class Block {
+  Block();
+
+  factory Block.fromJson(Map<String, Object?> json) {
+    return switch (json) {
+      {'type': 'h1', 'text': String text} => HeaderBlock(text),
+      {'type': 'p', 'text': String text} => ParagraphBlock(text),
+      {'type': 'checkbox', 'text': String text, 'checked': bool checked} =>
+        CheckboxBlock(text, checked),
+      _ => throw const FormatException('Unexpected JSON format'),
+    };
   }
 }
 
@@ -32,33 +59,17 @@ class CheckboxBlock extends Block {
   CheckboxBlock(this.text, this.isChecked);
 }
 
-class Block {
-  final String type;
-  final String text;
-  Block(this.type, this.text);
-
-  factory Block.fromJson(Map<String, dynamic> json) {
-    if (json case {'type': var type, 'text': var text}) {
-      return Block(type, text);
-    } else {
-      throw const FormatException('Unexpected JSON format');
-    }
-  }
-}
-
 const documentJson = '''
 {
   "metadata": {
-    // ...
+    "title": "My Document",
+    "modified": "2023-05-10"
   },
   "blocks": [
     {
       "type": "h1",
       "text": "Chapter 1"
     },
-    // ...
-  ]
-}
     {
       "type": "p",
       "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
